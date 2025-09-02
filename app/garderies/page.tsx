@@ -4,6 +4,7 @@
 import React from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { protectionConfigs } from '@/components/auth/ProtectedRoute';
+import GarderieTable from '@/components/garderies/GarderieTable';
 
 export default function GarderiesPage() {
   return (
@@ -15,14 +16,8 @@ export default function GarderiesPage() {
             Manage registered daycare centers in your network.
           </p>
         </div>
-        
-        <div className="rounded-lg border border-dashed p-8 text-center">
-          <h3 className="text-lg font-semibold">Daycare Management Coming Soon</h3>
-          <p className="text-muted-foreground mt-2">
-            This feature is under development. You'll be able to add, edit, and 
-            manage daycare centers here.
-          </p>
-        </div>
+
+        <GarderieTable />
       </div>
     </ProtectedRoute>
   );
