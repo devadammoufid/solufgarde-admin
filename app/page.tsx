@@ -317,6 +317,10 @@ export default function DashboardPage() {
                         <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3}/>
                         <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
                       </linearGradient>
+                      <linearGradient id="colorAbsent" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.25}/>
+                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                      </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                     <XAxis dataKey="name" className="text-xs" />
@@ -324,11 +328,17 @@ export default function DashboardPage() {
                     <Tooltip 
                       content={({ active, payload, label }) => {
                         if (active && payload && payload.length) {
+                          const presentPoint = payload.find((p: any) => p.dataKey === 'present');
+                          const absentPoint = payload.find((p: any) => p.dataKey === 'absent');
                           return (
                             <div className="bg-background border border-border rounded-lg p-2 shadow-lg">
                               <p className="font-medium">{label}</p>
-                              <p className="text-green-600">Present: {payload[0].value}</p>
-                              <p className="text-red-600">Absent: {payload[1].value}</p>
+                              {presentPoint && (
+                                <p className="text-sky-600">Present: {presentPoint.value}</p>
+                              )}
+                              {absentPoint && (
+                                <p className="text-red-600">Absent: {absentPoint.value}</p>
+                              )}
                             </div>
                           );
                         }
@@ -341,6 +351,13 @@ export default function DashboardPage() {
                       stroke="#0ea5e9" 
                       fillOpacity={1} 
                       fill="url(#colorPresent)" 
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="absent" 
+                      stroke="#ef4444" 
+                      fillOpacity={1} 
+                      fill="url(#colorAbsent)" 
                     />
                   </AreaChart>
                 </ResponsiveContainer>
