@@ -12,10 +12,9 @@ import { ProtectedRoute, protectionConfigs } from '@/components/auth/ProtectedRo
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
 import apiClient from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-client';
-import type { JobOfferEntity, JobApplicationEntity, UpdateJobOfferDto } from '@/types/api';
+import type { JobOfferEntity, JobApplicationEntity, UpdateJobOfferDto, JobOfferStatus } from '@/types/api';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,6 +22,7 @@ import { z } from 'zod';
 import { toast } from 'react-hot-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
+import { StatusBadge } from '@/components/common/StatusBadge';
 import { CANADIAN_PROVINCES } from '@/lib/constants';
 
 export default function JobOfferDetailPage() {
@@ -45,6 +45,7 @@ export default function JobOfferDetailPage() {
     startDate: z.string(),
     endDate: z.string(),
     region: z.string().refine((val) => CANADIAN_PROVINCES.some(p => p.code === val), 'Sélectionnez une région valide'),
+    status: z.enum(['draft', 'published', 'closed', 'archived']).optional(),
   });
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<z.infer<typeof updateSchema>>({
@@ -55,6 +56,7 @@ export default function JobOfferDetailPage() {
       startDate: offer.startDate?.slice(0, 10) || '',
       endDate: offer.endDate?.slice(0, 10) || '',
       region: offer.region || '',
+      status: (offer.status as any) || 'draft',
     } : undefined,
   });
 
@@ -79,8 +81,20 @@ export default function JobOfferDetailPage() {
       startDate: data.startDate,
       endDate: data.endDate,
       region: data.region,
+      status: data.status as JobOfferStatus,
     };
     await mutation.mutateAsync(payload);
+  });
+
+  const statusMutation = useMutation({
+    mutationKey: ['jobOffers', 'status', id],
+    mutationFn: async (status: JobOfferStatus) => apiClient.updateJobOffer(id, { status }),
+    onSuccess: async () => {
+      toast.success('Statut mis à jour');
+      await queryClient.invalidateQueries({ queryKey: queryKeys.jobOffers.detail(id) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.jobOffers.all });
+    },
+    onError: (e: any) => toast.error(e?.message || 'Échec de la mise à jour du statut'),
   });
 
   const { data: applications, isLoading: isLoadingApps } = useQuery({
@@ -158,6 +172,16 @@ export default function JobOfferDetailPage() {
             <Button size="sm" onClick={() => { setEditing((e) => !e); if (!editing && offer) reset(); }}>
               {editing ? 'Annuler' : 'Modifier'}
             </Button>
+            {!editing && offer && (
+              <>
+                {(!offer.status || offer.status === 'draft') && (
+                  <Button size="sm" onClick={() => statusMutation.mutate('published')}>Publier</Button>
+                )}
+                {offer.status === 'published' && (
+                  <Button variant="destructive" size="sm" onClick={() => statusMutation.mutate('closed')}>Fermer</Button>
+                )}
+              </>
+            )}
           </div>
         </div>
 
@@ -197,6 +221,18 @@ export default function JobOfferDetailPage() {
                     {errors.region && <p className="text-xs text-destructive">{errors.region.message}</p>}
                   </div>
                   <div className="space-y-1">
+                    <label className="text-sm text-muted-foreground">Statut</label>
+                    <select
+                      {...register('status')}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option value="draft">Brouillon</option>
+                      <option value="published">Publié</option>
+                      <option value="closed">Fermé</option>
+                      <option value="archived">Archivé</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
                     <label className="text-sm text-muted-foreground">Début</label>
                     <Input type="date" {...register('startDate')} />
                   </div>
@@ -223,6 +259,12 @@ export default function JobOfferDetailPage() {
                   <div className="space-y-1">
                     <div className="text-sm text-muted-foreground">Région</div>
                     <div className="font-medium">{offer.region || '—'}</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-sm text-muted-foreground">Statut</div>
+                    <div>
+                      <StatusBadge status={offer.status === 'published' ? 'published' : offer.status === 'closed' || offer.status === 'archived' ? 'inactive' : 'draft'} size="sm" />
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <div className="text-sm text-muted-foreground">Garderie</div>

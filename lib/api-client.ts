@@ -196,10 +196,22 @@ export class SolugardeApiClient {
   }
 
   async refreshToken(): Promise<AuthResponseDto> {
-    return this.request<AuthResponseDto>({
-      method: 'POST',
-      url: '/auth/refresh',
-    });
+    // Use the refresh token directly; do NOT use the interceptor (access token may be expired)
+    const refreshToken = this.getStoredRefreshToken();
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+    const response = await axios.post(
+      `${this.baseURL}/auth/refresh`,
+      {},
+      { headers: { Authorization: `Bearer ${refreshToken}` } }
+    );
+    const { accessToken, refreshToken: newRefreshToken, user } = response.data as AuthResponseDto;
+    this.setStoredTokens(accessToken, newRefreshToken);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('solugarde_user', JSON.stringify(user));
+    }
+    return response.data as AuthResponseDto;
   }
 
   // Dashboard endpoints

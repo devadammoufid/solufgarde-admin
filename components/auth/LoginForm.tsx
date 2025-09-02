@@ -87,7 +87,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   const handleDemoLogin = (role: 'admin' | 'client' | 'staff') => {
     const demoCredentials = {
-      admin: { email: 'admin@solugarde.com', password: 'password123' },
+      admin: { email: 'jhon.doe1@example.com', password: '123456789' },
       client: { email: 'client@solugarde.com', password: 'password123' },
       staff: { email: 'staff@solugarde.com', password: 'password123' },
     };

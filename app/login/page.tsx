@@ -34,6 +34,7 @@ export default function LoginPage() {
   const { login, isAuthenticated, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [remember, setRemember] = useState(false);
 
   const redirectUrl = searchParams.get('redirect') || '/';
 
@@ -42,6 +43,7 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors, isValid },
     setFocus,
+    setValue,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     mode: 'onBlur',
@@ -63,11 +65,27 @@ export default function LoginPage() {
     setFocus('email');
   }, [setFocus]);
 
+  // Load remembered email
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('solugarde_remember_email');
+      if (stored) {
+        setValue('email', stored);
+        setRemember(true);
+      }
+    } catch {}
+  }, [setValue]);
+
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
     
     try {
       await login(data.email, data.password);
+      // Remember email preference
+      try {
+        if (remember) localStorage.setItem('solugarde_remember_email', data.email);
+        else localStorage.removeItem('solugarde_remember_email');
+      } catch {}
       
       toast.success('Welcome back!');
       router.replace(redirectUrl);
@@ -197,12 +215,14 @@ export default function LoginPage() {
                   <input
                     id="remember"
                     type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
                     className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                   />
                   <Label htmlFor="remember" className="text-sm text-muted-foreground">
                     Se souvenir de moi
-                </Label>
-              </div>
+                  </Label>
+                </div>
               <Button variant="link" className="px-0 text-sm">
                   Mot de passe oublié ?
               </Button>
@@ -236,7 +256,7 @@ export default function LoginPage() {
                 Identifiants de démonstration
               </p>
               <div className="text-sm text-muted-foreground space-y-1">
-                <p><strong>Administrateur :</strong> admin@solugarde.com</p>
+                <p><strong>Administrateur :</strong> jhon.doe1@example.com</p>
                 <p><strong>Client :</strong> client@solugarde.com</p>
                 <p><strong>Remplaçant :</strong> staff@solugarde.com</p>
                 <p><strong>Mot de passe :</strong> password123</p>

@@ -98,6 +98,8 @@ export interface RemplacantEntity {
 }
 
 // Job Offers and Applications
+export type JobOfferStatus = 'draft' | 'published' | 'closed' | 'archived';
+
 export interface JobOfferEntity {
   id: string;
   title: string;
@@ -106,6 +108,7 @@ export interface JobOfferEntity {
   endDate: string;
   region: string;
   garderie: GarderieEntity;
+  status?: JobOfferStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -120,6 +123,7 @@ export interface CreateJobOfferDto {
   garderieId: string;
   requirements?: string[];
   hourlyRate?: number;
+  status?: JobOfferStatus;
 }
 
 export interface UpdateJobOfferDto {
@@ -131,6 +135,7 @@ export interface UpdateJobOfferDto {
   garderieId?: string;
   requirements?: string[];
   hourlyRate?: number;
+  status?: JobOfferStatus;
 }
 
 export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'canceled';

@@ -175,6 +175,7 @@ export const STORAGE_KEYS = {
   SIDEBAR_COLLAPSED: 'solugarde_sidebar_collapsed',
   THEME: 'solugarde_theme',
   LANGUAGE: 'solugarde_language',
+  REMEMBER_EMAIL: 'solugarde_remember_email',
 } as const;
 
 // Error messages
