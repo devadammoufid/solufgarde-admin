@@ -109,14 +109,14 @@ export default function GarderiesPage() {
       <div className="space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Daycare Centers</h1>
-            <p className="text-muted-foreground">Manage registered daycare centers in your network.</p>
+            <h1 className="text-3xl font-bold tracking-tight">Garderies</h1>
+            <p className="text-muted-foreground">Gérer les garderies enregistrées dans votre réseau.</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={() => alert('Create Garderie form coming soon')}
+            <Button onClick={() => alert('Formulaire de création à venir')}
               className="gap-2">
               <Plus className="h-4 w-4" />
-              New Garderie
+              Nouvelle garderie
             </Button>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function GarderiesPage() {
             <CardTitle className="text-base">Garderies</CardTitle>
             <div className="flex w-full sm:w-auto items-center gap-2">
               <SearchInput
-                placeholder="Search by name, email, region"
+                placeholder="Rechercher par nom, e-mail, région"
                 value={search}
                 onSearch={setSearch}
                 className="w-full sm:w-80"
@@ -137,25 +137,25 @@ export default function GarderiesPage() {
                   size="sm"
                   onClick={() => setStatus('all')}
                 >
-                  All
+                  Tous
                 </Button>
                 <Button
                   variant={status === 'active' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setStatus('active')}
                 >
-                  Active
+                  Actives
                 </Button>
                 <Button
                   variant={status === 'inactive' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setStatus('inactive')}
                 >
-                  Inactive
+                  Inactives
                 </Button>
               </div>
               <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
-                {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Refresh'}
+                {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Rafraîchir'}
               </Button>
             </div>
           </CardHeader>
@@ -167,7 +167,7 @@ export default function GarderiesPage() {
             ) : isError ? (
               <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4">
                 <p className="text-sm text-destructive">
-                  {(error as Error)?.message || 'Failed to load garderies.'}
+                  {(error as Error)?.message || 'Échec du chargement des garderies.'}
                 </p>
               </div>
             ) : (

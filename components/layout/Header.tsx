@@ -138,13 +138,13 @@ export const Header: React.FC<HeaderProps> = ({
           </Button>
         )}
 
-        {/* Search */}
-        <div className="flex-1 max-w-md">
+        {/* Recherche */}
+        <div className="flex-1 max-w-md w-full">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search staff, garderies, or applications..."
+              placeholder="Rechercher du personnel, des garderies ou des candidatures..."
               className={cn(
                 "pl-10 transition-all duration-200",
                 isSearchFocused && "ring-2 ring-ring"
@@ -158,17 +158,17 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center space-x-2">
-          {/* Theme toggle */}
+        <div className="ml-auto flex items-center gap-2">
+          {/* Thème */}
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            title={`Passer en mode ${theme === 'dark' ? 'clair' : 'sombre'}`}
           >
             <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
+            <span className="sr-only">Changer de thème</span>
           </Button>
 
           {/* Notifications */}
@@ -181,14 +181,14 @@ export const Header: React.FC<HeaderProps> = ({
                     {unreadNotifications.length}
                   </span>
                 )}
-                <span className="sr-only">View notifications</span>
+                <span className="sr-only">Voir les notifications</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-0" align="end">
               <div className="border-b border-border p-4">
                 <h3 className="font-semibold">Notifications</h3>
                 <p className="text-sm text-muted-foreground">
-                  You have {unreadNotifications.length} unread notifications
+                  Vous avez {unreadNotifications.length} notification(s) non lue(s)
                 </p>
               </div>
               <div className="max-h-64 overflow-y-auto">
@@ -218,13 +218,13 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
               <div className="p-2 border-t border-border">
                 <Button variant="ghost" className="w-full text-sm">
-                  View all notifications
+                  Voir toutes les notifications
                 </Button>
               </div>
             </PopoverContent>
           </Popover>
 
-          {/* User menu */}
+          {/* Utilisateur */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center space-x-2 h-auto p-2">
@@ -259,16 +259,16 @@ export const Header: React.FC<HeaderProps> = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <span>Profil</span>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span>Paramètres</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>Se déconnecter</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

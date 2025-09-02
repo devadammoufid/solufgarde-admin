@@ -43,91 +43,91 @@ interface NavItem {
 
 const navigationItems: NavItem[] = [
   {
-    title: 'Dashboard',
+    title: 'Tableau de bord',
     href: '/',
     icon: LayoutDashboard,
-    description: 'Overview and insights',
+    description: 'Aperçu et indicateurs',
   },
   {
-    title: 'Staff Management',
+    title: 'Gestion du personnel',
     href: '/staff',
     icon: Users,
     roles: ['admin', 'client'],
-    description: 'Manage staff and substitutes',
+    description: 'Gérer le personnel et les remplaçants',
   },
   {
     title: 'Garderies',
     href: '/garderies',
     icon: Building2,
     roles: ['admin'],
-    description: 'Manage daycare centers',
+    description: 'Gérer les garderies',
   },
   {
-    title: 'Job Offers',
+    title: "Offres d'emploi",
     href: '/job-offers',
     icon: Briefcase,
     roles: ['admin', 'client'],
-    description: 'Create and manage job postings',
+    description: 'Créer et gérer des offres',
   },
   {
-    title: 'Applications',
+    title: 'Candidatures',
     href: '/applications',
     icon: UserPlus,
-    description: 'View and manage applications',
+    description: 'Voir et gérer les candidatures',
   },
   {
-    title: 'Schedules',
+    title: 'Plannings',
     href: '/schedules',
     icon: Calendar,
-    description: 'Weekly planning and attendance',
+    description: 'Planification et présence',
   },
   {
-    title: 'Timesheets',
+    title: 'Feuilles de temps',
     href: '/timesheets',
     icon: Clock,
-    description: 'Track working hours',
+    description: 'Suivre les heures travaillées',
   },
   {
-    title: 'Availability',
+    title: 'Disponibilités',
     href: '/availability',
     icon: MapPin,
     roles: ['remplacant'],
-    description: 'Manage your availability',
+    description: 'Gérer vos disponibilités',
   },
   {
-    title: 'Invoices',
+    title: 'Factures',
     href: '/invoices',
     icon: CreditCard,
-    description: 'Payment and billing',
+    description: 'Paiements et facturation',
   },
   {
     title: 'Messages',
     href: '/messages',
     icon: MessageSquare,
-    description: 'Communication center',
+    description: 'Centre de communication',
   },
   {
-    title: 'Reports',
+    title: 'Rapports',
     href: '/reports',
     icon: BarChart3,
     roles: ['admin', 'client'],
-    description: 'Analytics and insights',
+    description: 'Analyses et statistiques',
   },
   {
     title: 'Notifications',
     href: '/notifications',
     icon: Bell,
     badge: '3',
-    description: 'Alerts and reminders',
+    description: 'Alertes et rappels',
   },
 ];
 
 const bottomNavItems: NavItem[] = [
   {
-    title: 'Settings',
+    title: 'Paramètres',
     href: '/settings',
     icon: Settings,
-    description: 'Account and preferences',
+    description: 'Compte et préférences',
   },
 ];
 
@@ -177,7 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <div>
               <h2 className="font-semibold text-foreground">Solugarde</h2>
-              <p className="text-xs text-muted-foreground">Admin Panel</p>
+              <p className="text-xs text-muted-foreground">Panneau d'administration</p>
             </div>
           </div>
         )}

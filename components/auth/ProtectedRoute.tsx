@@ -40,26 +40,26 @@ const AccessDenied: React.FC<AccessDeniedProps> = ({
     switch (reason) {
       case 'unauthenticated':
         return {
-          title: 'Authentication Required',
-          description: 'You need to sign in to access this page.',
+          title: 'Authentification requise',
+          description: 'Vous devez vous connecter pour accéder à cette page.',
           icon: Lock,
-          action: 'Sign In',
+          action: 'Se connecter',
           actionHandler: () => router.push(`/login?redirect=${encodeURIComponent(pathname)}`),
         };
       case 'insufficient_role':
         return {
-          title: 'Access Denied',
-          description: `This page requires ${requiredRoles?.join(' or ')} role. Your current role is ${userRole}.`,
+          title: 'Accès refusé',
+          description: `Cette page nécessite le rôle ${requiredRoles?.join(' ou ')}. Votre rôle actuel est ${userRole}.`,
           icon: Shield,
-          action: 'Go to Dashboard',
+          action: 'Aller au tableau de bord',
           actionHandler: () => router.push('/'),
         };
       case 'insufficient_permissions':
         return {
-          title: 'Insufficient Permissions',
-          description: 'You don\'t have the required permissions to access this resource.',
+          title: 'Permissions insuffisantes',
+          description: 'Vous ne disposez pas des permissions requises pour accéder à cette ressource.',
           icon: AlertTriangle,
-          action: 'Contact Administrator',
+          action: "Contacter l'administrateur",
           actionHandler: () => {
             // Could open a support modal or redirect to help page
             console.log('Contact administrator for access');
@@ -67,10 +67,10 @@ const AccessDenied: React.FC<AccessDeniedProps> = ({
         };
       default:
         return {
-          title: 'Access Denied',
-          description: 'You are not authorized to view this page.',
+          title: 'Accès refusé',
+          description: 'Vous n\'êtes pas autorisé à afficher cette page.',
           icon: Shield,
-          action: 'Go Back',
+          action: 'Retour',
           actionHandler: () => router.back(),
         };
     }
@@ -171,7 +171,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center space-y-4">
           <div className="loading-spinner h-8 w-8" />
-          <p className="text-muted-foreground">Verifying access...</p>
+          <p className="text-muted-foreground">Vérification des accès...</p>
         </div>
       </div>
     );

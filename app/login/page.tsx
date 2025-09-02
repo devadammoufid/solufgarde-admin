@@ -18,12 +18,12 @@ import { toast } from 'react-hot-toast';
 const loginSchema = z.object({
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+    .min(1, 'L\'e-mail est requis')
+    .email('Veuillez saisir une adresse e-mail valide'),
   password: z
     .string()
-    .min(1, 'Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .min(1, 'Le mot de passe est requis')
+    .min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -106,9 +106,9 @@ export default function LoginPage() {
               <span className="text-primary-foreground font-bold text-2xl">S</span>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
+          <h1 className="text-3xl font-bold text-foreground">Bon retour</h1>
           <p className="text-muted-foreground">
-            Sign in to your Solugarde admin account
+            Connectez-vous à votre compte administrateur Solugarde
           </p>
         </div>
 
@@ -116,10 +116,10 @@ export default function LoginPage() {
         <Card className="shadow-xl border-0">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-semibold text-center">
-              Sign In
+              Connexion
             </CardTitle>
             <CardDescription className="text-center">
-              Enter your credentials to access your account
+              Entrez vos identifiants pour accéder à votre compte
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -136,7 +136,7 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="vous@exemple.com"
                     className={cn(
                       "pl-10",
                       errors.email && "border-destructive focus:ring-destructive"
@@ -152,7 +152,7 @@ export default function LoginPage() {
               {/* Password Field */}
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium">
-                  Password
+                  Mot de passe
                 </Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -161,7 +161,7 @@ export default function LoginPage() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
+                    placeholder="Entrez votre mot de passe"
                     className={cn(
                       "pl-10 pr-10",
                       errors.password && "border-destructive focus:ring-destructive"
@@ -182,7 +182,7 @@ export default function LoginPage() {
                       <Eye className="h-4 w-4 text-muted-foreground" />
                     )}
                     <span className="sr-only">
-                      {showPassword ? 'Hide password' : 'Show password'}
+                      {showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
                     </span>
                   </Button>
                 </div>
@@ -200,12 +200,12 @@ export default function LoginPage() {
                     className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                   />
                   <Label htmlFor="remember" className="text-sm text-muted-foreground">
-                    Remember me
-                  </Label>
-                </div>
-                <Button variant="link" className="px-0 text-sm">
-                  Forgot password?
-                </Button>
+                    Se souvenir de moi
+                </Label>
+              </div>
+              <Button variant="link" className="px-0 text-sm">
+                  Mot de passe oublié ?
+              </Button>
               </div>
 
               {/* Submit Button */}
@@ -218,10 +218,10 @@ export default function LoginPage() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    Connexion...
                   </>
                 ) : (
-                  'Sign In'
+                  'Se connecter'
                 )}
               </Button>
             </form>
@@ -233,13 +233,13 @@ export default function LoginPage() {
           <CardContent className="pt-6">
             <div className="text-center space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
-                Demo Credentials
+                Identifiants de démonstration
               </p>
               <div className="text-sm text-muted-foreground space-y-1">
-                <p><strong>Admin:</strong> admin@solugarde.com</p>
-                <p><strong>Client:</strong> client@solugarde.com</p>
-                <p><strong>Staff:</strong> staff@solugarde.com</p>
-                <p><strong>Password:</strong> password123</p>
+                <p><strong>Administrateur :</strong> admin@solugarde.com</p>
+                <p><strong>Client :</strong> client@solugarde.com</p>
+                <p><strong>Remplaçant :</strong> staff@solugarde.com</p>
+                <p><strong>Mot de passe :</strong> password123</p>
               </div>
             </div>
           </CardContent>
@@ -248,9 +248,9 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="text-center text-sm text-muted-foreground">
           <p>
-            Don't have an account?{' '}
+            Vous n'avez pas de compte ?{' '}
             <Button variant="link" className="px-0">
-              Contact your administrator
+              Contactez votre administrateur
             </Button>
           </p>
         </div>

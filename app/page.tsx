@@ -151,9 +151,9 @@ export default function DashboardPage() {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return 'Bonjour';
+    if (hour < 18) return 'Bon après-midi';
+    return 'Bonsoir';
   };
 
   const getStatsForRole = () => {
@@ -162,31 +162,31 @@ export default function DashboardPage() {
     if (isAdmin) {
       return [
         {
-          title: 'Total Users',
+          title: 'Utilisateurs',
           value: mockData.totalUsers || 150,
-          change: '+12.5% from last month',
+          change: '+12,5% par rapport au mois dernier',
           changeType: 'positive' as const,
           icon: Users,
-          description: 'Active users in the system',
+          description: 'Utilisateurs actifs dans le système',
         },
         {
-          title: 'Active Garderies',
+          title: 'Garderies actives',
           value: mockData.totalGarderies || 12,
-          change: '+2 new this month',
+          change: '+2 nouvelles ce mois-ci',
           changeType: 'positive' as const,
           icon: Building2,
         },
         {
-          title: 'Pending Applications',
+          title: 'Candidatures en attente',
           value: mockData.pendingApplications || 8,
-          change: '-15% from yesterday',
+          change: '-15% depuis hier',
           changeType: 'positive' as const,
           icon: AlertTriangle,
         },
         {
-          title: 'Monthly Revenue',
+          title: 'Revenu mensuel',
           value: `$${(mockData.totalRevenue || 58000).toLocaleString()}`,
-          change: '+18.2% from last month',
+          change: '+18,2% par rapport au mois dernier',
           changeType: 'positive' as const,
           icon: DollarSign,
         },
@@ -194,28 +194,28 @@ export default function DashboardPage() {
     } else if (isClient) {
       return [
         {
-          title: 'Active Staff',
+          title: 'Personnel actif',
           value: mockData.activeStaff || 87,
-          change: '+5.2% from last week',
+          change: '+5,2% par rapport à la semaine dernière',
           changeType: 'positive' as const,
           icon: Users,
         },
         {
-          title: 'Today\'s Schedules',
+          title: 'Plannings du jour',
           value: mockData.todaySchedules || 25,
           icon: Calendar,
         },
         {
-          title: 'Unpaid Invoices',
+          title: 'Factures impayées',
           value: mockData.unpaidInvoices || 3,
-          change: 'Due within 7 days',
+          change: 'Échéance sous 7 jours',
           changeType: 'negative' as const,
           icon: CreditCard,
         },
         {
-          title: 'This Month Hours',
-          value: `${(mockData.thisMonthHours || 2340).toLocaleString()}h`,
-          change: '+8.1% from last month',
+          title: 'Heures ce mois-ci',
+          value: `${(mockData.thisMonthHours || 2340).toLocaleString()} h`,
+          change: '+8,1% par rapport au mois dernier',
           changeType: 'positive' as const,
           icon: Clock,
         },
@@ -223,28 +223,28 @@ export default function DashboardPage() {
     } else {
       return [
         {
-          title: 'Applications Sent',
+          title: 'Candidatures envoyées',
           value: 12,
-          change: '+3 this week',
+          change: '+3 cette semaine',
           changeType: 'positive' as const,
           icon: Activity,
         },
         {
-          title: 'Accepted Jobs',
+          title: 'Missions acceptées',
           value: 5,
           icon: CheckCircle,
         },
         {
-          title: 'Hours This Month',
-          value: '184h',
-          change: '+12h from last month',
+          title: 'Heures ce mois-ci',
+          value: '184 h',
+          change: '+12 h par rapport au mois dernier',
           changeType: 'positive' as const,
           icon: Clock,
         },
         {
-          title: 'Earnings',
+          title: 'Gains',
           value: '$2,840',
-          change: '+15.2% from last month',
+          change: '+15,2% par rapport au mois dernier',
           changeType: 'positive' as const,
           icon: DollarSign,
         },
@@ -281,12 +281,12 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">
-          {getGreeting()}, {user?.firstName}!
+          {getGreeting()}, {user?.firstName} !
         </h1>
         <p className="text-muted-foreground">
-          {isAdmin && "Welcome to your admin dashboard. Here's what's happening today."}
-          {isClient && "Welcome to your daycare management dashboard."}
-          {isRemplacant && "Welcome to your substitute dashboard. Check your latest opportunities."}
+          {isAdmin && "Bienvenue sur votre tableau de bord administrateur."}
+          {isClient && "Bienvenue sur votre tableau de bord de gestion."}
+          {isRemplacant && "Bienvenue sur votre tableau de bord remplaçant."}
         </p>
       </div>
 
@@ -303,9 +303,9 @@ export default function DashboardPage() {
         {(isAdmin || isClient) && (
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle>Weekly Attendance</CardTitle>
+              <CardTitle>Présence hebdomadaire</CardTitle>
               <CardDescription>
-                Staff attendance for the current week
+                Taux de présence du personnel pour la semaine en cours
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -334,10 +334,10 @@ export default function DashboardPage() {
                             <div className="bg-background border border-border rounded-lg p-2 shadow-lg">
                               <p className="font-medium">{label}</p>
                               {presentPoint && (
-                                <p className="text-sky-600">Present: {presentPoint.value}</p>
+                                <p className="text-sky-600">Présents : {presentPoint.value}</p>
                               )}
                               {absentPoint && (
-                                <p className="text-red-600">Absent: {absentPoint.value}</p>
+                                <p className="text-red-600">Absents : {absentPoint.value}</p>
                               )}
                             </div>
                           );
@@ -370,9 +370,9 @@ export default function DashboardPage() {
         {(isAdmin || isClient) && (
           <Card>
             <CardHeader>
-              <CardTitle>Staff Distribution</CardTitle>
+              <CardTitle>Répartition du personnel</CardTitle>
               <CardDescription>
-                Breakdown by employment type
+                Répartition par type d'emploi
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -406,10 +406,10 @@ export default function DashboardPage() {
       {isAdmin && (
         <Card>
           <CardHeader>
-            <CardTitle>Revenue Overview</CardTitle>
-            <CardDescription>
-              Monthly revenue and expenses comparison
-            </CardDescription>
+              <CardTitle>Revenus</CardTitle>
+              <CardDescription>
+                Comparaison des revenus et dépenses mensuels
+              </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-80">
@@ -436,9 +436,9 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle>Actions rapides</CardTitle>
           <CardDescription>
-            Frequently used actions for your role
+            Actions fréquentes selon votre rôle
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -447,19 +447,19 @@ export default function DashboardPage() {
               <>
                 <Button className="justify-start" variant="outline">
                   <Users className="mr-2 h-4 w-4" />
-                  Add New User
+                  Ajouter un utilisateur
                 </Button>
                 <Button className="justify-start" variant="outline">
                   <Building2 className="mr-2 h-4 w-4" />
-                  Create Garderie
+                  Créer une garderie
                 </Button>
                 <Button className="justify-start" variant="outline">
                   <Activity className="mr-2 h-4 w-4" />
-                  Generate Report
+                  Générer un rapport
                 </Button>
                 <Button className="justify-start" variant="outline">
                   <CreditCard className="mr-2 h-4 w-4" />
-                  Process Payments
+                  Traiter les paiements
                 </Button>
               </>
             )}
@@ -467,19 +467,19 @@ export default function DashboardPage() {
               <>
                 <Button className="justify-start" variant="outline">
                   <Users className="mr-2 h-4 w-4" />
-                  Post Job Offer
+                  Publier une offre
                 </Button>
                 <Button className="justify-start" variant="outline">
                   <Calendar className="mr-2 h-4 w-4" />
-                  Create Schedule
+                  Créer un planning
                 </Button>
                 <Button className="justify-start" variant="outline">
                   <Clock className="mr-2 h-4 w-4" />
-                  Approve Timesheets
+                  Approuver les feuilles de temps
                 </Button>
                 <Button className="justify-start" variant="outline">
                   <CreditCard className="mr-2 h-4 w-4" />
-                  View Invoices
+                  Voir les factures
                 </Button>
               </>
             )}
@@ -487,19 +487,19 @@ export default function DashboardPage() {
               <>
                 <Button className="justify-start" variant="outline">
                   <Activity className="mr-2 h-4 w-4" />
-                  Browse Jobs
+                  Parcourir les offres
                 </Button>
                 <Button className="justify-start" variant="outline">
                   <Calendar className="mr-2 h-4 w-4" />
-                  Update Availability
+                  Mettre à jour mes disponibilités
                 </Button>
                 <Button className="justify-start" variant="outline">
                   <Clock className="mr-2 h-4 w-4" />
-                  Submit Timesheet
+                  Soumettre une feuille de temps
                 </Button>
                 <Button className="justify-start" variant="outline">
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  View Applications
+                  Voir mes candidatures
                 </Button>
               </>
             )}

@@ -106,10 +106,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     <Card className="w-full max-w-md shadow-xl border-0">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-semibold text-center">
-          Sign In
+          Connexion
         </CardTitle>
         <CardDescription className="text-center">
-          Enter your credentials to access your account
+          Entrez vos identifiants pour accéder à votre compte
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -117,7 +117,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           {/* Email Field */}
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
-              Email Address
+              Adresse e-mail
             </Label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -126,7 +126,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="vous@exemple.com"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 className={`pl-10 ${errors.email ? 'border-destructive focus:ring-destructive' : ''}`}
@@ -145,7 +145,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           {/* Password Field */}
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-medium">
-              Password
+              Mot de passe
             </Label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -154,7 +154,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
+                placeholder="Entrez votre mot de passe"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 className={`pl-10 pr-10 ${errors.password ? 'border-destructive focus:ring-destructive' : ''}`}
@@ -176,7 +176,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   <Eye className="h-4 w-4 text-muted-foreground" />
                 )}
                 <span className="sr-only">
-                  {showPassword ? 'Hide password' : 'Show password'}
+                  {showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
                 </span>
               </Button>
             </div>
@@ -200,11 +200,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 disabled={isSubmitting}
               />
               <Label htmlFor="remember" className="text-sm text-muted-foreground">
-                Remember me
+                Se souvenir de moi
               </Label>
             </div>
             <Button variant="link" className="px-0 text-sm" type="button">
-              Forgot password?
+              Mot de passe oublié ?
             </Button>
           </div>
 
@@ -218,10 +218,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             {isSubmitting || isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                Connexion...
               </>
             ) : (
-              'Sign In'
+              'Se connecter'
             )}
           </Button>
         </form>
@@ -230,7 +230,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <div className="mt-6 p-4 bg-muted/50 rounded-lg">
           <div className="text-center space-y-3">
             <p className="text-sm font-medium text-muted-foreground">
-              Demo Credentials (Click to auto-fill)
+              Identifiants de démonstration (cliquez pour remplir)
             </p>
             <div className="flex flex-wrap gap-2 justify-center">
               <Button
@@ -258,7 +258,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 onClick={() => handleDemoLogin('staff')}
                 disabled={isSubmitting}
               >
-                Staff
+                Remplaçant
               </Button>
             </div>
           </div>
