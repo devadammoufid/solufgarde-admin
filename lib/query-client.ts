@@ -209,12 +209,22 @@ export const cacheUtils = {
 if (process.env.NODE_ENV === 'development') {
   // Log query cache changes
   queryClient.getQueryCache().subscribe((event) => {
-    console.log('[React Query]', event.type, event.query.queryKey);
+    try {
+      const key = event?.query?.queryKey ?? [];
+      console.log('[React Query]', event.type, key);
+    } catch (e) {
+      // no-op
+    }
   });
   
   // Log mutation events
   queryClient.getMutationCache().subscribe((event) => {
-    console.log('[React Query Mutation]', event.type, event.mutation.options.mutationKey);
+    try {
+      const key = event?.mutation?.options?.mutationKey ?? [];
+      console.log('[React Query Mutation]', event.type, key);
+    } catch (e) {
+      // no-op
+    }
   });
 }
 

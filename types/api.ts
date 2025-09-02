@@ -110,6 +110,29 @@ export interface JobOfferEntity {
   updatedAt: string;
 }
 
+// Job Offer DTOs
+export interface CreateJobOfferDto {
+  title: string;
+  description: string;
+  startDate: string; // ISO date
+  endDate: string;   // ISO date
+  region: string;
+  garderieId: string;
+  requirements?: string[];
+  hourlyRate?: number;
+}
+
+export interface UpdateJobOfferDto {
+  title?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  region?: string;
+  garderieId?: string;
+  requirements?: string[];
+  hourlyRate?: number;
+}
+
 export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'canceled';
 
 export interface JobApplicationEntity {

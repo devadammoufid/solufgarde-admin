@@ -343,6 +343,22 @@ export class SolugardeApiClient {
     });
   }
 
+  async createJobOffer(data: CreateJobOfferDto): Promise<JobOfferEntity> {
+    return this.request<JobOfferEntity>({
+      method: 'POST',
+      url: '/job-offers',
+      data,
+    });
+  }
+
+  async updateJobOffer(id: string, data: UpdateJobOfferDto): Promise<JobOfferEntity> {
+    return this.request<JobOfferEntity>({
+      method: 'PATCH',
+      url: `/job-offers/${id}`,
+      data,
+    });
+  }
+
   // Timesheet endpoints
   async getTimesheets(params?: TimesheetQueryParams): Promise<PaginatedResponse<TimesheetEntity>> {
     return this.request<PaginatedResponse<TimesheetEntity>>({
