@@ -128,8 +128,11 @@ export default function JobOffersPage() {
           const canClose = status === 'published';
           return (
             <div className="flex gap-2">
+              <Link href={`/job-offers/${id}/view`}>
+                <Button asChild={false} variant="outline" size="sm">Aperçu</Button>
+              </Link>
               <Link href={`/job-offers/${id}`}>
-                <Button asChild={false} variant="outline" size="sm">Voir</Button>
+                <Button asChild={false} size="sm">Modifier</Button>
               </Link>
               {canPublish && (
                 <Button size="sm" onClick={() => onUpdateStatus(id, 'published')}>Publier</Button>

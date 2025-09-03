@@ -23,7 +23,8 @@ import {
   RemplacantQueryParams,
   ApplicationQueryParams,
   TimesheetQueryParams,
-  InvoiceQueryParams
+  InvoiceQueryParams,
+  ApplicationStatus
 } from '@/types/api';
 import type { CreateJobOfferDto, UpdateJobOfferDto } from '@/types/api';
 
@@ -337,6 +338,17 @@ export class SolugardeApiClient {
       method: 'GET',
       url: '/applications',
       params,
+    });
+  }
+
+  async updateApplication(
+    id: string,
+    data: { status?: ApplicationStatus; note?: string }
+  ): Promise<JobApplicationEntity> {
+    return this.request<JobApplicationEntity>({
+      method: 'PATCH',
+      url: `/applications/${id}`,
+      data,
     });
   }
 

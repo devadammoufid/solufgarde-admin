@@ -25,7 +25,7 @@ export function DatePicker({ date, onChange, placeholder = "Pick a date", disabl
           variant="outline"
           data-empty={!date}
           className={cn(
-            "w-[280px] justify-start text-left font-normal data-[empty=true]:text-muted-foreground",
+            "w-[280px] h-9 px-3 justify-start text-left font-normal text-xs data-[empty=true]:text-muted-foreground",
             className
           )}
         >

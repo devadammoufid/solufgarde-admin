@@ -73,6 +73,7 @@ const navigationItems: NavItem[] = [
     title: 'Candidatures',
     href: '/applications',
     icon: UserPlus,
+    roles: ['admin', 'client'],
     description: 'Voir et gérer les candidatures',
   },
   {
