@@ -25,6 +25,7 @@ import {
   TimesheetQueryParams,
   InvoiceQueryParams
 } from '@/types/api';
+import type { CreateJobOfferDto, UpdateJobOfferDto } from '@/types/api';
 
 export class SolugardeApiClient {
   private client: AxiosInstance;
@@ -340,7 +341,7 @@ export class SolugardeApiClient {
   }
 
   // Job offers endpoints
-  async getJobOffers(params?: { region?: string; startDate?: string; page?: number; limit?: number }): Promise<PaginatedResponse<JobOfferEntity>> {
+  async getJobOffers(params?: { region?: string; startDate?: string; garderieId?: string; page?: number; limit?: number }): Promise<PaginatedResponse<JobOfferEntity>> {
     return this.request<PaginatedResponse<JobOfferEntity>>({
       method: 'GET',
       url: '/job-offers',

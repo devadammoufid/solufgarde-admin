@@ -18,11 +18,12 @@ import { queryKeys } from '@/lib/query-client';
 import type { JobOfferEntity, CreateJobOfferDto, UpdateJobOfferDto, JobOfferStatus } from '@/types/api';
 import { Loader2, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-hot-toast';
 import { CANADIAN_PROVINCES } from '@/lib/constants';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function JobOffersPage() {
@@ -154,17 +155,33 @@ export default function JobOffersPage() {
   const createSchema = z.object({
     title: z.string().min(5, 'Le titre doit comporter au moins 5 caractères'),
     description: z.string().min(20, 'La description doit comporter au moins 20 caractères'),
-    startDate: z.string().min(1, 'Date de début requise'),
-    endDate: z.string().min(1, 'Date de fin requise'),
+    startDate: z
+      .string()
+      .min(1, 'Date de début requise')
+      .refine((v) => !isNaN(Date.parse(v)), 'Date de début invalide')
+      .refine((v) => {
+        const d = new Date(v + 'T00:00:00')
+        const now = new Date()
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        return d.getTime() > today.getTime()
+      }, 'La date de début doit être postérieure à aujourd\'hui'),
+    endDate: z
+      .string()
+      .min(1, 'Date de fin requise')
+      .refine((v) => !isNaN(Date.parse(v)), 'Date de fin invalide'),
     region: z.string().refine((val) => CANADIAN_PROVINCES.some(p => p.code === val), 'Sélectionnez une région valide'),
     garderieId: z.string().min(1, 'Garderie requise'),
     hourlyRate: z
       .string()
       .optional()
-      .transform((v) => (v ? Number(v) : undefined))
-      .refine((v) => v === undefined || (!isNaN(v) && v >= 0), 'Taux horaire invalide'),
-  }).refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
-    message: 'La date de fin doit être postérieure à la date de début',
+      .refine((v) => v === undefined || v === '' || (!isNaN(Number(v)) && Number(v) >= 0), 'Taux horaire invalide'),
+  }).refine((data) => {
+    const start = new Date(data.startDate + 'T00:00:00')
+    const end = new Date(data.endDate + 'T00:00:00')
+    const minEnd = new Date(start.getTime() + 24 * 60 * 60 * 1000)
+    return end.getTime() >= minEnd.getTime()
+  }, {
+    message: 'La date de fin doit être au moins un jour après la date de début',
     path: ['endDate'],
   });
 
@@ -173,6 +190,9 @@ export default function JobOffersPage() {
     register,
     handleSubmit,
     reset,
+    control,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateForm>({
     resolver: zodResolver(createSchema),
@@ -183,7 +203,7 @@ export default function JobOffersPage() {
       endDate: '',
       region: '',
       garderieId: '',
-      hourlyRate: undefined,
+      hourlyRate: '',
     },
   });
 
@@ -215,7 +235,7 @@ export default function JobOffersPage() {
       endDate: data.endDate,
       region: data.region,
       garderieId: resolvedGarderieId,
-      hourlyRate: typeof data.hourlyRate === 'number' ? data.hourlyRate : undefined,
+      hourlyRate: data.hourlyRate ? Number(data.hourlyRate) : undefined,
       status: 'draft',
     };
     await createMutation.mutateAsync(payload);
@@ -264,14 +284,59 @@ export default function JobOffersPage() {
                 </div>
                 <div className="space-y-1">
                   <label className="text-sm text-muted-foreground">Début</label>
-                  <Input type="date" {...register('startDate')} />
+                  <Controller
+                    control={control}
+                    name="startDate"
+                    render={({ field }) => {
+                      const selected = field.value ? new Date(field.value + 'T00:00:00') : undefined
+                      const now = new Date()
+                      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+                      return (
+                        <DatePicker
+                          date={selected}
+                          onChange={(d) => {
+                            const next = d ? format(d, 'yyyy-MM-dd') : ''
+                            field.onChange(next)
+                            const endVal = watch('endDate')
+                            if (endVal) {
+                              const startD = next ? new Date(next + 'T00:00:00') : undefined
+                              const endD = new Date(endVal + 'T00:00:00')
+                              if (!startD || endD.getTime() <= startD.getTime()) {
+                                setValue('endDate', '', { shouldValidate: true, shouldDirty: true })
+                              }
+                            }
+                          }}
+                          disabled={(d) => d.getTime() <= today.getTime()}
+                        />
+                      )
+                    }}
+                  />
                   {errors.startDate && <p className="text-xs text-destructive">{errors.startDate.message}</p>}
                 </div>
                 <div className="space-y-1">
                   <label className="text-sm text-muted-foreground">Fin</label>
-                  <Input type="date" {...register('endDate')} />
+                  <Controller
+                    control={control}
+                    name="endDate"
+                    render={({ field }) => {
+                      const selected = field.value ? new Date(field.value + 'T00:00:00') : undefined
+                      const startVal = watch('startDate') as string | undefined
+                      const start = startVal ? new Date(startVal + 'T00:00:00') : undefined
+                      const now = new Date()
+                      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+                      const min = start ? start : today
+                      return (
+                        <DatePicker
+                          date={selected}
+                          onChange={(d) => field.onChange(d ? format(d, 'yyyy-MM-dd') : '')}
+                          disabled={(d) => d.getTime() <= min.getTime()}
+                        />
+                      )
+                    }}
+                  />
                   {errors.endDate && <p className="text-xs text-destructive">{errors.endDate.message}</p>}
                 </div>
+                
                 {isAdmin ? (
                   <div className="space-y-1">
                     <label className="text-sm text-muted-foreground">Garderie</label>

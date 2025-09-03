@@ -96,14 +96,28 @@ export const updateGarderieSchema = createGarderieSchema.partial().extend({
 export const createJobOfferSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
   description: z.string().min(20, 'Description must be at least 20 characters'),
-  startDate: z.string().refine(date => !isNaN(Date.parse(date)), 'Invalid start date'),
+  startDate: z
+    .string()
+    .refine(date => !isNaN(Date.parse(date)), 'Invalid start date')
+    .refine(date => {
+      const d = new Date(date + 'T00:00:00')
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      return d.getTime() > today.getTime()
+    }, 'Start date must be after today'),
   endDate: z.string().refine(date => !isNaN(Date.parse(date)), 'Invalid end date'),
   region: z.string().min(2, 'Region is required'),
   garderieId: z.string().min(1, 'Garderie ID is required'),
   requirements: z.array(z.string()).optional(),
   hourlyRate: z.number().min(0, 'Hourly rate must be positive').optional(),
-}).refine(data => new Date(data.endDate) > new Date(data.startDate), {
-  message: 'End date must be after start date',
+}).refine(data => {
+  const start = new Date(data.startDate + 'T00:00:00')
+  const end = new Date(data.endDate + 'T00:00:00')
+  // end must be at least one day after start (>= start + 1 day)
+  const minEnd = new Date(start.getTime() + 24 * 60 * 60 * 1000)
+  return end.getTime() >= minEnd.getTime()
+}, {
+  message: 'End date must be at least one day after start date',
   path: ['endDate'],
 });
 
