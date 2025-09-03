@@ -187,6 +187,30 @@ export const fileUploadSchema = z.object({
       'File must be JPEG, PNG, WebP, or PDF'),
 });
 
+// Scheduling schemas
+export const createShiftSchema = z.object({
+  garderieId: z.string().min(1, 'Garderie requise'),
+  date: z.string().refine((v) => !isNaN(Date.parse(v)), 'Date invalide'),
+  startTime: z.string().min(1, 'Heure de début requise'), // HH:mm
+  endTime: z.string().min(1, 'Heure de fin requise'),
+  role: z.string().optional(),
+  hourlyRate: z
+    .string()
+    .optional()
+    .refine((v) => v === undefined || v === '' || (!isNaN(Number(v)) && Number(v) >= 0), 'Taux invalide'),
+  notes: z.string().max(500).optional(),
+}).refine((data) => {
+  // Compare times on the same day
+  const start = new Date(`${data.date}T${data.startTime}:00`)
+  const end = new Date(`${data.date}T${data.endTime}:00`)
+  return end.getTime() > start.getTime()
+}, {
+  message: 'Heure de fin doit être après l\'heure de début',
+  path: ['endTime'],
+});
+
+export type CreateShiftForm = z.infer<typeof createShiftSchema>;
+
 // Export all schema types
 export type LoginForm = z.infer<typeof loginSchema>;
 export type RegisterForm = z.infer<typeof registerSchema>;

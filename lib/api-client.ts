@@ -26,6 +26,7 @@ import {
   InvoiceQueryParams,
   ApplicationStatus
 } from '@/types/api';
+import type { ShiftEntity, ShiftQueryParams, CreateShiftDto, UpdateShiftDto } from '@/types/api';
 import type { CreateJobOfferDto, UpdateJobOfferDto } from '@/types/api';
 
 export class SolugardeApiClient {
@@ -390,6 +391,61 @@ export class SolugardeApiClient {
       method: 'GET',
       url: '/timesheets',
       params,
+    });
+  }
+
+  async createTimesheet(data: CreateTimesheetDto): Promise<TimesheetEntity> {
+    return this.request<TimesheetEntity>({
+      method: 'POST',
+      url: '/timesheets',
+      data,
+    });
+  }
+
+  async updateTimesheet(id: string, data: UpdateTimesheetDto): Promise<TimesheetEntity> {
+    return this.request<TimesheetEntity>({
+      method: 'PATCH',
+      url: `/timesheets/${id}`,
+      data,
+    });
+  }
+
+  // Schedules (Shifts) endpoints
+  async getSchedules(params?: ShiftQueryParams): Promise<PaginatedResponse<ShiftEntity>> {
+    return this.request<PaginatedResponse<ShiftEntity>>({
+      method: 'GET',
+      url: '/schedules',
+      params,
+    });
+  }
+
+  async createSchedule(data: CreateShiftDto): Promise<ShiftEntity> {
+    return this.request<ShiftEntity>({
+      method: 'POST',
+      url: '/schedules',
+      data,
+    });
+  }
+
+  async updateSchedule(id: string, data: UpdateShiftDto): Promise<ShiftEntity> {
+    return this.request<ShiftEntity>({
+      method: 'PATCH',
+      url: `/schedules/${id}`,
+      data,
+    });
+  }
+
+  async publishSchedule(id: string): Promise<ShiftEntity> {
+    return this.request<ShiftEntity>({
+      method: 'POST',
+      url: `/schedules/${id}/publish`,
+    });
+  }
+
+  async cancelSchedule(id: string): Promise<ShiftEntity> {
+    return this.request<ShiftEntity>({
+      method: 'POST',
+      url: `/schedules/${id}/cancel`,
     });
   }
 

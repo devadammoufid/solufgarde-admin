@@ -295,6 +295,9 @@ export interface CreateTimesheetDto {
 
 export interface UpdateTimesheetDto {
   isVerified?: boolean;
+  checkInAt?: string;
+  checkOutAt?: string | null;
+  notes?: string | null;
 }
 
 export interface CreateInvoiceDto {
@@ -358,4 +361,53 @@ export interface InvoiceQueryParams {
   page?: number;
   limit?: number;
   status?: InvoiceStatus;
+}
+
+// Scheduling (Shifts)
+export type ShiftStatus = 'draft' | 'published' | 'completed' | 'canceled' | 'billed';
+
+export interface ShiftEntity {
+  id: string;
+  garderie: GarderieEntity;
+  remplacant?: RemplacantEntity;
+  startAt: string; // ISO datetime
+  endAt: string;   // ISO datetime
+  role?: string;
+  status: ShiftStatus;
+  hourlyRate?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ShiftQueryParams {
+  garderieId?: string;
+  userId?: string;
+  from?: string; // ISO date
+  to?: string;   // ISO date
+  status?: ShiftStatus;
+  page?: number;
+  limit?: number;
+}
+
+export interface CreateShiftDto {
+  garderieId: string;
+  userId?: string; // assign optional
+  startAt: string; // ISO datetime
+  endAt: string;   // ISO datetime
+  role?: string;
+  hourlyRate?: number;
+  notes?: string;
+  status?: ShiftStatus; // default draft
+}
+
+export interface UpdateShiftDto {
+  garderieId?: string;
+  userId?: string | null; // null to unassign
+  startAt?: string;
+  endAt?: string;
+  role?: string;
+  hourlyRate?: number;
+  notes?: string;
+  status?: ShiftStatus;
 }

@@ -124,6 +124,11 @@ export const queryKeys = {
     list: (filters?: Record<string, any>) => ['timesheets', 'list', filters] as const,
     detail: (id: string) => ['timesheets', 'detail', id] as const,
   },
+  schedules: {
+    all: ['schedules'] as const,
+    list: (filters?: Record<string, any>) => ['schedules', 'list', filters] as const,
+    detail: (id: string) => ['schedules', 'detail', id] as const,
+  },
   
   // Invoices and payments
   invoices: {
