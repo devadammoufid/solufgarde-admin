@@ -95,10 +95,14 @@ export default function GarderiesPage() {
     {
       id: 'actions',
       header: 'Actions',
-      cell: () => (
+      cell: ({ row }) => (
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">View</Button>
-          <Button variant="outline" size="sm">Edit</Button>
+          <Button variant="outline" size="sm" asChild>
+            <a href={`/garderies/${row.original.id}`}>Voir</a>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <a href={`/garderies/${row.original.id}`}>Modifier</a>
+          </Button>
         </div>
       ),
     },

@@ -276,7 +276,7 @@ export default function JobOffersPage() {
                   <label className="text-sm text-muted-foreground">Région</label>
                   <select
                     {...register('region')}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     <option value="">Sélectionner...</option>
                     {CANADIAN_PROVINCES.map((r) => (
@@ -345,7 +345,7 @@ export default function JobOffersPage() {
                     <label className="text-sm text-muted-foreground">Garderie</label>
                     <select
                       {...register('garderieId')}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       <option value="">Sélectionner...</option>
                       {garderies?.data?.map((g) => (
@@ -391,7 +391,7 @@ export default function JobOffersPage() {
               <select
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                className="w-full sm:w-48 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="w-full sm:w-48 rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="">Toutes les régions</option>
                 {CANADIAN_PROVINCES.map((r) => (
@@ -402,7 +402,7 @@ export default function JobOffersPage() {
                 <select
                   value={garderieId}
                   onChange={(e) => setGarderieId(e.target.value)}
-                  className="w-full sm:w-60 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="w-full sm:w-60 rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <option value="">Toutes les garderies</option>
                   {garderies?.data?.map((g) => (

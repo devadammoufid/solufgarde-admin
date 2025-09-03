@@ -1,6 +1,6 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono, Roboto } from 'next/font/google';
 import { AppProviders } from '@/components/providers/AppProviders';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +14,13 @@ const inter = Inter({
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
+  display: 'swap',
+});
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  variable: '--font-heading',
+  weight: ['400','500','700'],
   display: 'swap',
 });
 
@@ -134,6 +141,7 @@ export default function RootLayout({
       className={cn(
         inter.variable, 
         jetbrainsMono.variable,
+        roboto.variable,
         'scroll-smooth antialiased'
       )}
       suppressHydrationWarning

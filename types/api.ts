@@ -229,6 +229,7 @@ export interface AuthResponseDto {
 
 // Dashboard Types
 export interface DashboardStats {
+  // Legacy fields (client/remplacant views)
   totalUsers?: number;
   activeStaff?: number;
   totalGarderies?: number;
@@ -237,6 +238,14 @@ export interface DashboardStats {
   unpaidInvoices?: number;
   totalRevenue?: number;
   thisMonthHours?: number;
+
+  // Admin dashboard fields
+  totalClients?: number;
+  totalRemplacants?: number;
+  totalMandates?: number;
+  totalHoursWorked?: number;
+  totalInvoices?: number;
+  upcomingMandates?: number;
 }
 
 // API Request Types

@@ -2,7 +2,7 @@
 // app/applications/page.tsx - Candidates (Applications)
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
@@ -21,8 +21,11 @@ import apiClient from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-client';
 import type { JobApplicationEntity, ApplicationStatus } from '@/types/api';
 import { Check, Eye, Loader2, X } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function ApplicationsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [status, setStatus] = useState<ApplicationStatus | ''>('');
   const [garderieId, setGarderieId] = useState('');
   const [jobOfferId, setJobOfferId] = useState('');
@@ -33,7 +36,50 @@ export default function ApplicationsPage() {
   const [actionOpen, setActionOpen] = useState(false);
   const [actionType, setActionType] = useState<null | 'accepted' | 'rejected'>(null);
   const [actionNote, setActionNote] = useState('');
+  const [langFilter, setLangFilter] = useState('');
+  const [minExp, setMinExp] = useState<string>('');
   const queryClient = useQueryClient();
+
+  // Initialize filters from URL on first render
+  useEffect(() => {
+    const s = (searchParams.get('status') || '') as ApplicationStatus | '';
+    const g = searchParams.get('garderieId') || '';
+    const o = searchParams.get('jobOfferId') || '';
+    const f = searchParams.get('from') || '';
+    const r = searchParams.get('ready') === '1';
+    const l = searchParams.get('lang') || '';
+    const e = searchParams.get('minExp') || '';
+    if (s) setStatus(s);
+    if (g) setGarderieId(g);
+    if (o) setJobOfferId(o);
+    if (f) setFromDate(new Date(f + 'T00:00:00'));
+    if (r) setReadyOnly(true);
+    if (l) setLangFilter(l);
+    if (e) setMinExp(e);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const pushFiltersToUrl = (next?: Partial<Record<string, string>>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const entries: Array<[string, string | undefined]> = [
+      ['status', status || undefined],
+      ['garderieId', garderieId || undefined],
+      ['jobOfferId', jobOfferId || undefined],
+      ['from', fromDate ? `${fromDate.getFullYear()}-${String(fromDate.getMonth() + 1).padStart(2, '0')}-${String(fromDate.getDate()).padStart(2, '0')}` : undefined],
+      ['ready', readyOnly ? '1' : undefined],
+      ['lang', langFilter || undefined],
+      ['minExp', minExp || undefined],
+    ];
+    for (const [k, v] of entries) {
+      if (v) params.set(k, v); else params.delete(k);
+    }
+    if (next) {
+      for (const [k, v] of Object.entries(next)) {
+        if (v) params.set(k, v); else params.delete(k);
+      }
+    }
+    router.replace(`/applications?${params.toString()}`);
+  };
 
   const { data: apps, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: queryKeys.applications.list({ status: status || undefined, garderieId: garderieId || undefined, jobOfferId: jobOfferId || undefined, page: 1, limit: 50, dateFrom: fromDate ? format(fromDate, 'yyyy-MM-dd') : undefined } as any),
@@ -73,7 +119,14 @@ export default function ApplicationsPage() {
         const name = u ? `${u.firstName} ${u.lastName}` : '—';
         return (
           <div className="flex flex-col">
-            <span className="font-medium">{name}</span>
+            <span className="font-medium flex items-center gap-2">{name}
+              {/* Aging badge */}
+              {row.original.appliedAt && (
+                <span className="text-[10px] rounded bg-muted px-1.5 py-0.5 text-muted-foreground">
+                  {Math.max(0, Math.floor((Date.now() - new Date(row.original.appliedAt).getTime()) / (24*60*60*1000)))} j
+                </span>
+              )}
+            </span>
             <div className="flex items-center gap-2">
               {u?.email && <span className="text-xs text-muted-foreground">{u.email}</span>}
               {row.original.remplacant?.profileCompleted && (
@@ -167,6 +220,58 @@ export default function ApplicationsPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>Rafraîchir</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Build CSV from filtered rows
+                const rows = (apps?.data ?? [])
+                  .filter(a => readyOnly ? Boolean(a.remplacant?.profileCompleted) : true)
+                  .filter(a => {
+                    // Language filter
+                    const langs = langFilter.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+                    if (langs.length) {
+                      const cl = (a.remplacant?.languages || []).map(s => (s || '').toLowerCase());
+                      if (!langs.every(l => cl.includes(l))) return false;
+                    }
+                    const me = parseInt(minExp || '0', 10);
+                    if (!isNaN(me) && me > 0) {
+                      const ye = a.remplacant?.yearsOfExperience || 0;
+                      if (ye < me) return false;
+                    }
+                    return true;
+                  });
+                const header = ['First Name','Last Name','Email','Region','Languages','Years','Garderie','Offer','Status','AppliedAt','DecisionAt'];
+                const csv = [header.join(',')].concat(rows.map(a => {
+                  const u = a.remplacant?.user;
+                  const langs = (a.remplacant?.languages || []).join('|');
+                  const vals = [
+                    u?.firstName || '',
+                    u?.lastName || '',
+                    u?.email || '',
+                    a.remplacant?.region || '',
+                    langs,
+                    String(a.remplacant?.yearsOfExperience ?? ''),
+                    a.garderie?.name || '',
+                    a.jobOffer?.title || '',
+                    a.status || '',
+                    a.appliedAt || '',
+                    a.decisionAt || '',
+                  ];
+                  return vals.map(v => `"${String(v).replace(/"/g, '""')}` + '"').join(',');
+                })).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'applications.csv';
+                link.click();
+                URL.revokeObjectURL(url);
+              }}
+              disabled={!apps?.data?.length}
+            >
+              Exporter CSV
+            </Button>
           </div>
         </div>
 
@@ -176,8 +281,8 @@ export default function ApplicationsPage() {
             <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2">
               <select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as ApplicationStatus | '')}
-                className="w-full sm:w-48 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                onChange={(e) => { setStatus(e.target.value as ApplicationStatus | ''); pushFiltersToUrl({ status: e.target.value || undefined }); }}
+                className="w-full sm:w-48 rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="">Tous les statuts</option>
                 <option value="pending">En attente</option>
@@ -188,8 +293,8 @@ export default function ApplicationsPage() {
 
               <select
                 value={garderieId}
-                onChange={(e) => setGarderieId(e.target.value)}
-                className="w-full sm:w-60 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                onChange={(e) => { setGarderieId(e.target.value); pushFiltersToUrl({ garderieId: e.target.value || undefined }); }}
+                className="w-full sm:w-60 rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="">Toutes les garderies</option>
                 {garderies?.data?.map((g) => (
@@ -199,8 +304,8 @@ export default function ApplicationsPage() {
 
               <select
                 value={jobOfferId}
-                onChange={(e) => setJobOfferId(e.target.value)}
-                className="w-full sm:w-60 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                onChange={(e) => { setJobOfferId(e.target.value); pushFiltersToUrl({ jobOfferId: e.target.value || undefined }); }}
+                className="w-full sm:w-60 rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="">Toutes les offres</option>
                 {offers?.data?.map((o) => (
@@ -209,12 +314,26 @@ export default function ApplicationsPage() {
               </select>
 
               <div className="w-full sm:w-auto">
-                <DatePicker date={fromDate} onChange={setFromDate} placeholder="Depuis le" />
+                <DatePicker date={fromDate} onChange={(d) => { setFromDate(d); pushFiltersToUrl({ from: d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` : undefined }); }} placeholder="Depuis le" />
               </div>
               <label className="inline-flex items-center gap-2 text-sm px-2 py-2">
-                <input type="checkbox" checked={readyOnly} onChange={(e) => setReadyOnly(e.target.checked)} />
+                <input type="checkbox" checked={readyOnly} onChange={(e) => { setReadyOnly(e.target.checked); pushFiltersToUrl({ ready: e.target.checked ? '1' : undefined }); }} />
                 Prêt à travailler
               </label>
+              <Input
+                placeholder="Langues (ex: fr,en)"
+                value={langFilter}
+                onChange={(e) => { setLangFilter(e.target.value); pushFiltersToUrl({ lang: e.target.value || undefined }); }}
+                className="w-full sm:w-48"
+              />
+              <Input
+                type="number"
+                min={0}
+                placeholder="Exp. min (années)"
+                value={minExp}
+                onChange={(e) => { setMinExp(e.target.value); pushFiltersToUrl({ minExp: e.target.value || undefined }); }}
+                className="w-full sm:w-40"
+              />
             </div>
           </CardHeader>
           <CardContent>
@@ -227,7 +346,21 @@ export default function ApplicationsPage() {
             ) : (
               <DataTable<JobApplicationEntity, unknown>
                 columns={columns}
-                data={(apps?.data ?? []).filter(a => readyOnly ? Boolean(a.remplacant?.profileCompleted) : true)}
+                data={(apps?.data ?? [])
+                  .filter(a => readyOnly ? Boolean(a.remplacant?.profileCompleted) : true)
+                  .filter(a => {
+                    const langs = langFilter.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+                    if (langs.length) {
+                      const cl = (a.remplacant?.languages || []).map(s => (s || '').toLowerCase());
+                      if (!langs.every(l => cl.includes(l))) return false;
+                    }
+                    const me = parseInt(minExp || '0', 10);
+                    if (!isNaN(me) && me > 0) {
+                      const ye = a.remplacant?.yearsOfExperience || 0;
+                      if (ye < me) return false;
+                    }
+                    return true;
+                  })}
                 searchable
                 filterable
                 pagination

@@ -232,7 +232,7 @@ export default function JobOfferDetailPage() {
                     <label className="text-sm text-muted-foreground">Région</label>
                     <select
                       {...register('region')}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       <option value="">Sélectionner...</option>
                       {CANADIAN_PROVINCES.map((r) => (
@@ -245,7 +245,7 @@ export default function JobOfferDetailPage() {
                     <label className="text-sm text-muted-foreground">Statut</label>
                     <select
                       {...register('status')}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       <option value="draft">Brouillon</option>
                       <option value="published">Publié</option>

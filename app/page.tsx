@@ -162,33 +162,46 @@ export default function DashboardPage() {
     if (isAdmin) {
       return [
         {
-          title: 'Utilisateurs',
-          value: mockData.totalUsers || 150,
-          change: '+12,5% par rapport au mois dernier',
-          changeType: 'positive' as const,
-          icon: Users,
-          description: 'Utilisateurs actifs dans le système',
+          title: 'Clients',
+          value: mockData.totalClients ?? 0,
+          icon: Building2,
+          description: 'Nombre total de clients',
         },
         {
-          title: 'Garderies actives',
-          value: mockData.totalGarderies || 12,
-          change: '+2 nouvelles ce mois-ci',
-          changeType: 'positive' as const,
-          icon: Building2,
+          title: 'Remplaçants',
+          value: mockData.totalRemplacants ?? 0,
+          icon: Users,
+          description: 'Nombre total de remplaçants',
         },
         {
           title: 'Candidatures en attente',
-          value: mockData.pendingApplications || 8,
-          change: '-15% depuis hier',
-          changeType: 'positive' as const,
+          value: mockData.pendingApplications ?? 0,
           icon: AlertTriangle,
         },
         {
-          title: 'Revenu mensuel',
-          value: `$${(mockData.totalRevenue || 58000).toLocaleString()}`,
-          change: '+18,2% par rapport au mois dernier',
-          changeType: 'positive' as const,
+          title: 'Revenu total',
+          value: `$${(mockData.totalRevenue ?? 0).toLocaleString()}`,
           icon: DollarSign,
+        },
+        {
+          title: 'Mandats',
+          value: mockData.totalMandates ?? 0,
+          icon: Calendar,
+        },
+        {
+          title: 'Heures travaillées',
+          value: `${(mockData.totalHoursWorked ?? 0).toLocaleString()} h`,
+          icon: Clock,
+        },
+        {
+          title: 'Factures',
+          value: mockData.totalInvoices ?? 0,
+          icon: CreditCard,
+        },
+        {
+          title: 'Mandats à venir',
+          value: mockData.upcomingMandates ?? 0,
+          icon: Activity,
         },
       ];
     } else if (isClient) {
