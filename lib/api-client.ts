@@ -511,6 +511,45 @@ export class SolugardeApiClient {
     });
   }
 
+  // Conversations & Messages
+  async getConversations(): Promise<Array<any>> {
+    return this.request<Array<any>>({
+      method: 'GET',
+      url: '/conversations',
+    });
+  }
+
+  async createConversation(data: { clientId: string; remplacantId: string }): Promise<any> {
+    return this.request<any>({
+      method: 'POST',
+      url: '/conversations',
+      data,
+    });
+  }
+
+  async getConversationMessages(conversationId: string): Promise<PaginatedResponse<any>> {
+    return this.request<PaginatedResponse<any>>({
+      method: 'GET',
+      url: `/conversations/${conversationId}/messages`,
+      params: { page: 1, limit: 50 },
+    });
+  }
+
+  async createMessage(data: { conversationId: string; body: string }): Promise<any> {
+    return this.request<any>({
+      method: 'POST',
+      url: '/messages',
+      data,
+    });
+  }
+
+  async markMessageRead(messageId: string): Promise<void> {
+    return this.request<void>({
+      method: 'POST',
+      url: `/messages/${messageId}/read`,
+    });
+  }
+
   // Availability endpoints
   async getAvailability(params?: {
     remplacantId?: string;
