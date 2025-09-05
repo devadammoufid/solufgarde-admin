@@ -267,6 +267,8 @@ export interface UpdateUserDto {
   role?: UserRole;
   isActive?: boolean;
   isBanned?: boolean;
+  // Optional: assign or move user to a garderie (null to unassign)
+  garderieId?: string | null;
 }
 
 export interface CreateGarderieDto {

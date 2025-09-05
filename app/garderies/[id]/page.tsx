@@ -24,8 +24,9 @@ import { Input } from '@/components/ui/input';
 import { CANADIAN_PROVINCES } from '@/lib/constants';
 import { toast } from 'react-hot-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { UpdateGarderieDto } from '@/types/api';
+import type { CreateUserDto, UpdateGarderieDto, UserEntity } from '@/types/api';
 import { updateGarderieSchema } from '@/lib/validations';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function GarderieDetailPage() {
   const params = useParams();
@@ -40,6 +41,10 @@ export default function GarderieDetailPage() {
 
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
+  const [openAssign, setOpenAssign] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [creatingClient, setCreatingClient] = useState(false);
+  const [newClient, setNewClient] = useState({ firstName: '', lastName: '', email: '', phone: '', password: '' });
 
   const form = useForm<z.infer<typeof updateGarderieSchema>>({
     resolver: zodResolver(updateGarderieSchema),
@@ -72,6 +77,40 @@ export default function GarderieDetailPage() {
     enabled: Boolean(id),
     queryFn: () => apiClient.getJobOffers({ garderieId: id, page: 1, limit: 10 }),
     staleTime: 60_000,
+  });
+
+  const { data: clients } = useQuery({
+    queryKey: queryKeys.users.list({ role: 'client', limit: 100 }),
+    enabled: Boolean(id),
+    queryFn: () => apiClient.getUsers({ role: 'client', page: 1, limit: 100 }),
+    staleTime: 60_000,
+  });
+
+  const assignMutation = useMutation({
+    mutationKey: ['users', 'assign', id],
+    mutationFn: async (payload: { userId: string }) => apiClient.updateUser(payload.userId, { garderieId: id }),
+    onSuccess: async () => {
+      toast.success('Utilisateur assigné');
+      await queryClient.invalidateQueries({ queryKey: queryKeys.garderies.detail(id) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.users.all as any });
+      setOpenAssign(false);
+      setSelectedUserId('');
+    },
+    onError: (e: any) => toast.error(e?.message || "Échec de l'assignation"),
+  });
+
+  const createClientMutation = useMutation({
+    mutationKey: ['users', 'create', 'client', id],
+    mutationFn: async (payload: CreateUserDto) => apiClient.createUser(payload),
+    onSuccess: async () => {
+      toast.success('Client créé et assigné');
+      await queryClient.invalidateQueries({ queryKey: queryKeys.garderies.detail(id) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.users.all as any });
+      setOpenAssign(false);
+      setCreatingClient(false);
+      setNewClient({ firstName: '', lastName: '', email: '', phone: '', password: '' });
+    },
+    onError: (e: any) => toast.error(e?.message || 'Échec de création'),
   });
 
   const { data: applications } = useQuery({
@@ -213,15 +252,99 @@ export default function GarderieDetailPage() {
                   <div className="md:col-span-2 space-y-1">
                     <div className="text-sm text-muted-foreground">Utilisateurs</div>
                     <div className="flex flex-wrap gap-2 text-sm">
-                      {(garderie.users || []).length ? (
-                        garderie.users.map((u) => (
-                          <span key={u.id} className="rounded bg-muted px-2 py-0.5">
-                            {u.firstName} {u.lastName} · {u.role}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-muted-foreground">Aucun utilisateur</span>
-                      )}
+                      {(() => {
+                        const assigned = (garderie.users && garderie.users.length > 0)
+                          ? garderie.users
+                          : (clients?.data || []).filter((u) => u.garderie?.id === id);
+                        return assigned.length ? (
+                          assigned.map((u) => (
+                            <span key={u.id} className="rounded bg-muted px-2 py-0.5">
+                              {u.firstName} {u.lastName} · {u.role}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-muted-foreground">Aucun utilisateur</span>
+                        );
+                      })()}
+                    </div>
+                    <div className="pt-2">
+                      <Dialog open={openAssign} onOpenChange={setOpenAssign}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="outline">Assigner un utilisateur</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[560px]">
+                          <DialogHeader>
+                            <DialogTitle>Assigner un client à cette garderie</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-sm font-medium">Sélectionner un client existant</label>
+                              <select
+                                className="mt-1 h-9 w-full rounded-md border bg-background px-2 text-sm"
+                                value={selectedUserId}
+                                onChange={(e) => setSelectedUserId(e.target.value)}
+                              >
+                                <option value="">— Choisir —</option>
+                                {(clients?.data || []).map((u) => (
+                                  <option key={u.id} value={u.id}>{u.firstName} {u.lastName} · {u.email}</option>
+                                ))}
+                              </select>
+                              <div className="flex justify-end pt-2">
+                                <Button size="sm" onClick={() => selectedUserId && assignMutation.mutate({ userId: selectedUserId })} disabled={!selectedUserId || assignMutation.isPending}>
+                                  {assignMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Assigner'}
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="border-t pt-3">
+                              <label className="inline-flex items-center gap-2 text-sm font-medium">
+                                <input type="checkbox" className="h-4 w-4" checked={creatingClient} onChange={(e) => setCreatingClient(e.target.checked)} />
+                                Ou créer un nouveau client
+                              </label>
+                              {creatingClient && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                                  <div>
+                                    <label className="text-sm font-medium">Prénom</label>
+                                    <Input value={newClient.firstName} onChange={(e) => setNewClient(v => ({ ...v, firstName: e.target.value }))} />
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium">Nom</label>
+                                    <Input value={newClient.lastName} onChange={(e) => setNewClient(v => ({ ...v, lastName: e.target.value }))} />
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium">E-mail</label>
+                                    <Input type="email" value={newClient.email} onChange={(e) => setNewClient(v => ({ ...v, email: e.target.value }))} />
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium">Téléphone</label>
+                                    <Input value={newClient.phone} onChange={(e) => setNewClient(v => ({ ...v, phone: e.target.value }))} />
+                                  </div>
+                                  <div className="sm:col-span-2">
+                                    <label className="text-sm font-medium">Mot de passe</label>
+                                    <Input type="password" value={newClient.password} onChange={(e) => setNewClient(v => ({ ...v, password: e.target.value }))} />
+                                  </div>
+                                  <div className="sm:col-span-2 flex justify-end">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => createClientMutation.mutate({
+                                        firstName: newClient.firstName,
+                                        lastName: newClient.lastName,
+                                        email: newClient.email,
+                                        phone: newClient.phone,
+                                        password: newClient.password,
+                                        role: 'client',
+                                        garderieId: id,
+                                      })}
+                                      disabled={!newClient.firstName || !newClient.lastName || !newClient.email || !newClient.password || createClientMutation.isPending}
+                                    >
+                                      {createClientMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Créer et assigner'}
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 </div>

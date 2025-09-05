@@ -56,6 +56,20 @@ const navigationItems: NavItem[] = [
     description: 'Gérer le personnel et les remplaçants',
   },
   {
+    title: 'Utilisateurs',
+    href: '/users',
+    icon: Users,
+    roles: ['admin'],
+    description: 'Gérer tous les comptes',
+  },
+  {
+    title: 'Remplaçants',
+    href: '/remplacants',
+    icon: Users,
+    roles: ['admin', 'client'],
+    description: 'Gérer les remplaçants',
+  },
+  {
     title: 'Garderies',
     href: '/garderies',
     icon: Building2,

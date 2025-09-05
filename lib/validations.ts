@@ -54,6 +54,7 @@ export const createUserSchema = z.object({
   lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   email: emailSchema,
   phone: phoneSchema,
+  password: z.string().min(8, 'Password must be at least 8 characters'),
   role: z.enum(['admin', 'client', 'remplacant']),
   garderieId: z.string().optional(),
   isActive: z.boolean().default(true),
@@ -61,6 +62,7 @@ export const createUserSchema = z.object({
 
 export const updateUserSchema = createUserSchema.partial().extend({
   id: z.string().min(1, 'User ID is required'),
+  garderieId: z.string().nullable().optional(),
 });
 
 export const updateProfileSchema = z.object({
