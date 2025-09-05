@@ -20,7 +20,7 @@ export interface AuthContextType {
   isRemplacant: boolean;
   
   // Authentication methods
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   refreshUserData: () => Promise<void>;
   
@@ -47,6 +47,7 @@ interface AuthProviderProps {
 const ACCESS_TOKEN_KEY = 'solugarde_access_token';
 const REFRESH_TOKEN_KEY = 'solugarde_refresh_token';
 const USER_KEY = 'solugarde_user';
+const REMEMBER_ME_KEY = 'solugarde_remember_me';
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserEntity | null>(null);
@@ -63,25 +64,58 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Token management functions
   const getAuthToken = (): string | null => {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
+    // Prefer sessionStorage if present (non-remembered sessions), else fallback to localStorage
+    return (
+      sessionStorage.getItem(ACCESS_TOKEN_KEY) ||
+      localStorage.getItem(ACCESS_TOKEN_KEY)
+    );
   };
 
   const getRefreshToken = (): string | null => {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
+    return (
+      sessionStorage.getItem(REFRESH_TOKEN_KEY) ||
+      localStorage.getItem(REFRESH_TOKEN_KEY)
+    );
   };
 
-  const setTokens = (accessToken: string, refreshToken: string) => {
+  const setTokens = (accessToken: string, refreshToken: string, rememberMe?: boolean) => {
     if (typeof window === 'undefined') return;
-    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    // Determine storage target
+    const remembered = typeof rememberMe === 'boolean'
+      ? rememberMe
+      : localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+
+    // Persist preference in localStorage so we can apply it after reloads
+    localStorage.setItem(REMEMBER_ME_KEY, remembered ? 'true' : 'false');
+
+    const target = remembered ? localStorage : sessionStorage;
+    const other = remembered ? sessionStorage : localStorage;
+
+    // Write to target and clean up the other storage to avoid stale values
+    target.setItem(ACCESS_TOKEN_KEY, accessToken);
+    target.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    try {
+      other.removeItem(ACCESS_TOKEN_KEY);
+      other.removeItem(REFRESH_TOKEN_KEY);
+    } catch {}
   };
 
   const clearTokens = () => {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    // Clear from both storage scopes for safety
+    try {
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+    } catch {}
+    try {
+      sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+      sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+      sessionStorage.removeItem(USER_KEY);
+    } catch {}
+    // Clear remember-me preference on logout
+    try { localStorage.removeItem(REMEMBER_ME_KEY); } catch {}
   };
 
   const hasValidToken = (): boolean => {
@@ -100,13 +134,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const saveUserToStorage = (userData: UserEntity) => {
     if (typeof window === 'undefined') return;
-    localStorage.setItem(USER_KEY, JSON.stringify(userData));
+    const remembered = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+    const target = remembered ? localStorage : sessionStorage;
+    const other = remembered ? sessionStorage : localStorage;
+    target.setItem(USER_KEY, JSON.stringify(userData));
+    try { other.removeItem(USER_KEY); } catch {}
   };
 
   const getUserFromStorage = (): UserEntity | null => {
     if (typeof window === 'undefined') return null;
     try {
-      const userData = localStorage.getItem(USER_KEY);
+      const userData = sessionStorage.getItem(USER_KEY) || localStorage.getItem(USER_KEY);
       return userData ? JSON.parse(userData) : null;
     } catch {
       return null;
@@ -168,14 +206,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Login function
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<void> => {
     try {
       setIsLoading(true);
       
       const response: AuthResponseDto = await apiClient.login({ email, password });
       
       // Store tokens and user data
-      setTokens(response.accessToken, response.refreshToken);
+      setTokens(response.accessToken, response.refreshToken, rememberMe);
       setUser(response.user);
       saveUserToStorage(response.user);
       

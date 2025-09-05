@@ -17,6 +17,7 @@ import apiClient from '@/lib/api-client';
 import { queryKeys } from '@/lib/query-client';
 import type { GarderieEntity } from '@/types/api';
 import { Plus, Loader2 } from 'lucide-react';
+ 
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
@@ -119,7 +120,7 @@ export default function GarderiesPage() {
           <div className="flex items-center gap-2">
             <Button onClick={() => alert('Formulaire de création à venir')}
               className="gap-2">
-              <Plus className="h-4 w-4" />
+              <Plus className="w-4 h-4" />
               Nouvelle garderie
             </Button>
           </div>
@@ -128,7 +129,7 @@ export default function GarderiesPage() {
         <Card>
           <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle className="text-base">Garderies</CardTitle>
-            <div className="flex w-full sm:w-auto items-center gap-2">
+            <div className="flex items-center w-full gap-2 sm:w-auto">
               <SearchInput
                 placeholder="Rechercher par nom, e-mail, région"
                 value={search}
@@ -159,17 +160,18 @@ export default function GarderiesPage() {
                 </Button>
               </div>
               <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
-                {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Rafraîchir'}
+                {isFetching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Rafraîchir'}
               </Button>
             </div>
           </CardHeader>
           <CardContent>
+            
             {isLoading ? (
               <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
             ) : isError ? (
-              <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4">
+              <div className="p-4 border rounded-md border-destructive/20 bg-destructive/5">
                 <p className="text-sm text-destructive">
                   {(error as Error)?.message || 'Échec du chargement des garderies.'}
                 </p>

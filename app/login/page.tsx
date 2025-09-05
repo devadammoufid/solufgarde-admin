@@ -80,7 +80,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     
     try {
-      await login(data.email, data.password);
+      await login(data.email, data.password, remember);
       // Remember email preference
       try {
         if (remember) localStorage.setItem('solugarde_remember_email', data.email);

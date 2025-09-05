@@ -27,47 +27,47 @@ const statusConfig: Record<StatusType, {
   dotColor: string; 
 }> = {
   active: {
-    label: 'Active',
+    label: 'Actif',
     className: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800',
     dotColor: 'bg-green-500',
   },
   inactive: {
-    label: 'Inactive',
+    label: 'Inactif',
     className: 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-950 dark:text-gray-300 dark:border-gray-800',
     dotColor: 'bg-gray-500',
   },
   pending: {
-    label: 'Pending',
+    label: 'En attente',
     className: 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950 dark:text-yellow-300 dark:border-yellow-800',
     dotColor: 'bg-yellow-500',
   },
   approved: {
-    label: 'Approved',
+    label: 'Approuvé',
     className: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800',
     dotColor: 'bg-blue-500',
   },
   rejected: {
-    label: 'Rejected',
+    label: 'Refusé',
     className: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800',
     dotColor: 'bg-red-500',
   },
   completed: {
-    label: 'Completed',
+    label: 'Terminé',
     className: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800',
     dotColor: 'bg-green-500',
   },
   cancelled: {
-    label: 'Cancelled',
+    label: 'Annulé',
     className: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800',
     dotColor: 'bg-red-500',
   },
   draft: {
-    label: 'Draft',
+    label: 'Brouillon',
     className: 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-950 dark:text-gray-300 dark:border-gray-800',
     dotColor: 'bg-gray-400',
   },
   published: {
-    label: 'Published',
+    label: 'Publié',
     className: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800',
     dotColor: 'bg-green-500',
   },

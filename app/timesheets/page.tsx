@@ -183,12 +183,15 @@ export default function TimesheetsPage() {
   return (
     <ProtectedRoute {...protectionConfigs.adminOrClient}>
       <div className="space-y-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-bold tracking-tight">Feuilles de temps</h1>
             <p className="text-muted-foreground">Approuvez, corrigez et exportez les heures travaillées.</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Pay period presets: last 14 days, previous 14 days */}
+            <Button variant="outline" size="sm" onClick={() => { const end = new Date(); const start = new Date(); start.setDate(end.getDate() - 13); setFromDate(start); setToDate(end); }}>Derniers 14 jours</Button>
+            <Button variant="outline" size="sm" onClick={() => { const end = new Date(); end.setDate(end.getDate() - 14); const start = new Date(); start.setDate(end.getDate() - 13); setFromDate(start); setToDate(end); }}>14 jours précédents</Button>
             {/* Quick ranges */}
             <Button variant="outline" size="sm" onClick={() => { const now = new Date(); const start = new Date(now); start.setDate(now.getDate() - now.getDay() + 1); const end = new Date(start); end.setDate(start.getDate() + 6); setFromDate(start); setToDate(end); }}>
               <CalendarDays className="h-4 w-4 mr-2" /> Cette semaine
@@ -311,6 +314,53 @@ export default function TimesheetsPage() {
                     <div className="font-medium mb-1 truncate">{name}</div>
                     <div className="text-muted-foreground">Heures: {minutesToHours(val.m)}</div>
                     <div className="text-muted-foreground">Vérifiées: {val.v}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Ready to invoice */}
+        {rows.length > 0 && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-base">Prêt à facturer</CardTitle>
+              <Button size="sm" onClick={() => {
+                const verifiedOnly = rows.filter((t) => t.isVerified);
+                const header = ['Garderie','Remplaçant','Date','Entrée','Sortie','Heures'];
+                const csv = [header.join(',')].concat(verifiedOnly.map(t => {
+                  const u = t.remplacant?.user;
+                  const vals = [
+                    t.garderie?.name || '',
+                    u ? `${u.firstName} ${u.lastName}` : '',
+                    t.date || '',
+                    t.checkInAt ? format(new Date(t.checkInAt), 'HH:mm') : '',
+                    t.checkOutAt ? format(new Date(t.checkOutAt), 'HH:mm') : '',
+                    (t.checkInAt && t.checkOutAt) ? minutesToHours(Math.max(0, differenceInMinutes(parseISO(t.checkOutAt), parseISO(t.checkInAt)))) : '',
+                  ];
+                  return vals.map(v => `"${String(v).replace(/"/g, '""')}` + '"').join(',');
+                })).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'ready-to-invoice.csv';
+                link.click();
+                URL.revokeObjectURL(url);
+              }}>Exporter</Button>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-2 md:grid-cols-3">
+                {Object.entries(rows.filter((t)=>t.isVerified).reduce((acc: Record<string, number>, t) => {
+                  const key = t.garderie?.name || '—';
+                  const mins = (t.checkInAt && t.checkOutAt) ? Math.max(0, differenceInMinutes(parseISO(t.checkOutAt), parseISO(t.checkInAt))) : 0;
+                  acc[key] = (acc[key] || 0) + mins;
+                  return acc;
+                }, {})).map(([name, m]) => (
+                  <div key={name} className="rounded border p-3 text-xs">
+                    <div className="font-medium mb-1 truncate">{name}</div>
+                    <div className="text-muted-foreground">Heures vérifiées: {minutesToHours(m)}</div>
                   </div>
                 ))}
               </div>

@@ -32,6 +32,10 @@ import type { CreateJobOfferDto, UpdateJobOfferDto } from '@/types/api';
 export class SolugardeApiClient {
   private client: AxiosInstance;
   private baseURL: string;
+  private static ACCESS_TOKEN_KEY = 'solugarde_access_token';
+  private static REFRESH_TOKEN_KEY = 'solugarde_refresh_token';
+  private static USER_KEY = 'solugarde_user';
+  private static REMEMBER_ME_KEY = 'solugarde_remember_me';
 
   constructor() {
     this.baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://solugarde-dev-production.up.railway.app/api/v1';
@@ -92,25 +96,48 @@ export class SolugardeApiClient {
 
   private getStoredToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('solugarde_access_token');
+    // Prefer sessionStorage (non-remembered sessions) then fallback to localStorage
+    return (
+      sessionStorage.getItem(SolugardeApiClient.ACCESS_TOKEN_KEY) ||
+      localStorage.getItem(SolugardeApiClient.ACCESS_TOKEN_KEY)
+    );
   }
 
   private getStoredRefreshToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('solugarde_refresh_token');
+    return (
+      sessionStorage.getItem(SolugardeApiClient.REFRESH_TOKEN_KEY) ||
+      localStorage.getItem(SolugardeApiClient.REFRESH_TOKEN_KEY)
+    );
   }
 
   private setStoredTokens(accessToken: string, refreshToken: string): void {
     if (typeof window === 'undefined') return;
-    localStorage.setItem('solugarde_access_token', accessToken);
-    localStorage.setItem('solugarde_refresh_token', refreshToken);
+    const remembered = localStorage.getItem(SolugardeApiClient.REMEMBER_ME_KEY) === 'true';
+    const target = remembered ? localStorage : sessionStorage;
+    const other = remembered ? sessionStorage : localStorage;
+
+    target.setItem(SolugardeApiClient.ACCESS_TOKEN_KEY, accessToken);
+    target.setItem(SolugardeApiClient.REFRESH_TOKEN_KEY, refreshToken);
+    try {
+      other.removeItem(SolugardeApiClient.ACCESS_TOKEN_KEY);
+      other.removeItem(SolugardeApiClient.REFRESH_TOKEN_KEY);
+    } catch {}
   }
 
   private clearStoredTokens(): void {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem('solugarde_access_token');
-    localStorage.removeItem('solugarde_refresh_token');
-    localStorage.removeItem('solugarde_user');
+    try {
+      localStorage.removeItem(SolugardeApiClient.ACCESS_TOKEN_KEY);
+      localStorage.removeItem(SolugardeApiClient.REFRESH_TOKEN_KEY);
+      localStorage.removeItem(SolugardeApiClient.USER_KEY);
+      localStorage.removeItem(SolugardeApiClient.REMEMBER_ME_KEY);
+    } catch {}
+    try {
+      sessionStorage.removeItem(SolugardeApiClient.ACCESS_TOKEN_KEY);
+      sessionStorage.removeItem(SolugardeApiClient.REFRESH_TOKEN_KEY);
+      sessionStorage.removeItem(SolugardeApiClient.USER_KEY);
+    } catch {}
   }
 
   private async tryRefreshToken(): Promise<boolean> {
@@ -212,7 +239,11 @@ export class SolugardeApiClient {
     const { accessToken, refreshToken: newRefreshToken, user } = response.data as AuthResponseDto;
     this.setStoredTokens(accessToken, newRefreshToken);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('solugarde_user', JSON.stringify(user));
+      const remembered = localStorage.getItem(SolugardeApiClient.REMEMBER_ME_KEY) === 'true';
+      const target = remembered ? localStorage : sessionStorage;
+      const other = remembered ? sessionStorage : localStorage;
+      target.setItem(SolugardeApiClient.USER_KEY, JSON.stringify(user));
+      try { other.removeItem(SolugardeApiClient.USER_KEY); } catch {}
     }
     return response.data as AuthResponseDto;
   }

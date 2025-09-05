@@ -99,17 +99,22 @@ export const createJobOfferSchema = z.object({
   startDate: z
     .string()
     .refine(date => !isNaN(Date.parse(date)), 'Invalid start date')
+<<<<<<< ours
     .refine(date => {
       const d = new Date(date + 'T00:00:00')
       const now = new Date()
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
       return d.getTime() > today.getTime()
     }, 'Start date must be after today'),
+=======
+    .refine(date => new Date(date) > new Date(), 'Start date must be in the future'),
+>>>>>>> theirs
   endDate: z.string().refine(date => !isNaN(Date.parse(date)), 'Invalid end date'),
   region: z.string().min(2, 'Region is required'),
   garderieId: z.string().min(1, 'Garderie ID is required'),
   requirements: z.array(z.string()).optional(),
   hourlyRate: z.number().min(0, 'Hourly rate must be positive').optional(),
+<<<<<<< ours
 }).refine(data => {
   const start = new Date(data.startDate + 'T00:00:00')
   const end = new Date(data.endDate + 'T00:00:00')
@@ -120,6 +125,20 @@ export const createJobOfferSchema = z.object({
   message: 'End date must be at least one day after start date',
   path: ['endDate'],
 });
+=======
+}).refine(
+  data => {
+    const start = new Date(data.startDate);
+    const end = new Date(data.endDate);
+    // end date must be at least one day after start date
+    return end > new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  },
+  {
+    message: 'End date must be at least one day after start date',
+    path: ['endDate'],
+  },
+);
+>>>>>>> theirs
 
 // Application schemas
 export const createApplicationSchema = z.object({

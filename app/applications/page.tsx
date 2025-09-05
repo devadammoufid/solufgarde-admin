@@ -38,6 +38,7 @@ export default function ApplicationsPage() {
   const [actionNote, setActionNote] = useState('');
   const [langFilter, setLangFilter] = useState('');
   const [minExp, setMinExp] = useState<string>('');
+  const [kanban, setKanban] = useState(false);
   const queryClient = useQueryClient();
 
   // Initialize filters from URL on first render
@@ -110,6 +111,24 @@ export default function ApplicationsPage() {
     staleTime: 5 * 60_000,
   });
 
+  // Simple scorecard: region match (+2), profileCompleted (+1), experience (0..2), languages match (+ up to 2)
+  const computeScore = (a: JobApplicationEntity) => {
+    let s = 0;
+    const r = (a.remplacant?.region || '').toLowerCase();
+    const g = (a.garderie?.region || '').toLowerCase();
+    if (r && g && r === g) s += 2;
+    if (a.remplacant?.profileCompleted) s += 1;
+    const yrs = a.remplacant?.yearsOfExperience || 0;
+    s += Math.min(yrs / 5, 2); // up to +2
+    const langs = (a.remplacant?.languages || []).map((x) => x.toLowerCase());
+    const want = (langFilter || '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
+    if (want.length) {
+      const hits = want.filter((l) => langs.includes(l)).length;
+      s += Math.min(hits, 2);
+    }
+    return Number(s.toFixed(2));
+  };
+
   const columns = useMemo<ColumnDef<JobApplicationEntity>[]>(() => [
     {
       id: 'candidate',
@@ -135,6 +154,15 @@ export default function ApplicationsPage() {
             </div>
           </div>
         );
+      },
+    },
+    {
+      id: 'score',
+      header: 'Score',
+      cell: ({ row }) => {
+        const s = computeScore(row.original);
+        const color = s >= 4 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : s >= 2.5 ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400' : 'bg-muted text-muted-foreground';
+        return <span className={`text-[10px] px-1.5 py-0.5 rounded ${color}`}>{s}</span>;
       },
     },
     {
@@ -219,6 +247,9 @@ export default function ApplicationsPage() {
             <p className="text-muted-foreground">Consultez et filtrez les candidatures.</p>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant={kanban ? 'default' : 'outline'} size="sm" onClick={() => setKanban((k) => !k)}>
+              {kanban ? 'Table' : 'Kanban'}
+            </Button>
             <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>Rafraîchir</Button>
             <Button
               variant="outline"
@@ -343,6 +374,45 @@ export default function ApplicationsPage() {
               <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4">
                 <p className="text-sm text-destructive">{(error as Error)?.message || "Échec du chargement des candidatures."}</p>
               </div>
+            ) : kanban ? (
+              <div className="grid gap-3 md:grid-cols-4">
+                {(['pending','accepted','rejected','canceled'] as ApplicationStatus[]).map((st) => {
+                  const list = (apps?.data ?? [])
+                    .filter(a => a.status === st)
+                    .filter(a => readyOnly ? Boolean(a.remplacant?.profileCompleted) : true)
+                    .sort((a,b) => computeScore(b) - computeScore(a));
+                  const label: Record<ApplicationStatus, string> = { pending: 'En attente', accepted: 'Acceptées', rejected: 'Refusées', canceled: 'Annulées' };
+                  return (
+                    <div key={st} className="rounded border p-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-xs text-muted-foreground">{label[st]}</div>
+                        <div className="text-[11px] text-muted-foreground">{list.length}</div>
+                      </div>
+                      <div className="space-y-2">
+                        {list.length === 0 ? (
+                          <div className="text-[11px] text-muted-foreground">Aucune</div>
+                        ) : list.map((a) => (
+                          <div key={a.id} className="rounded bg-muted p-2 text-[11px]">
+                            <div className="flex items-center justify-between">
+                              <div className="font-medium truncate">{a.remplacant?.user?.firstName} {a.remplacant?.user?.lastName}</div>
+                              <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded ${computeScore(a) >= 4 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : computeScore(a) >= 2.5 ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400' : 'bg-muted text-muted-foreground'}`}>{computeScore(a)}</span>
+                            </div>
+                            <div className="truncate text-muted-foreground">{a.garderie?.name} • {a.jobOffer?.title}</div>
+                            <div className="flex gap-2 pt-1">
+                              {st !== 'accepted' && (
+                                <Button size="sm" onClick={() => statusMutation.mutate({ id: a.id, status: 'accepted' })}>Accepter</Button>
+                              )}
+                              {st !== 'rejected' && (
+                                <Button variant="destructive" size="sm" onClick={() => statusMutation.mutate({ id: a.id, status: 'rejected' })}>Refuser</Button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
               <DataTable<JobApplicationEntity, unknown>
                 columns={columns}
@@ -360,7 +430,8 @@ export default function ApplicationsPage() {
                       if (ye < me) return false;
                     }
                     return true;
-                  })}
+                  })
+                  .sort((a,b) => computeScore(b) - computeScore(a))}
                 searchable
                 filterable
                 pagination

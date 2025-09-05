@@ -68,7 +68,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      await login(formData.email, formData.password);
+      await login(formData.email, formData.password, formData.rememberMe);
       
       // Call success callback if provided
       if (onSuccess) {
